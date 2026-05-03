@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BusTrack — Resilient Campus Transport</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050810;--surface:#0a0e1a;--surface2:#0f1526;
+  --border:#1a2040;--border2:#243060;
+  --text:#e2e8ff;--muted:#4a5580;--muted2:#6b7db3;
+  --accent:#4f6ef7;--cyan:#00d4ff;--green:#00ff88;
+  --amber:#ffaa00;--red:#ff4466;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,8,16,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.nav-logo-icon{width:28px;height:28px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--accent)}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{font-size:13px;color:var(--muted2);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{display:flex;gap:10px}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:'Inter',sans-serif}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#3d5ce5;transform:translateY(-1px)}
+.btn-large{padding:14px 28px;font-size:15px;border-radius:10px}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text);padding:14px 28px;font-size:15px;border-radius:10px}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,110,247,0.12),transparent)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid rgba(79,110,247,0.3);border-radius:999px;background:rgba(79,110,247,0.08);font-size:12px;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:24px}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(36px,6vw,72px);font-weight:800;line-height:1.1;margin-bottom:20px;letter-spacing:-1px}
+.hero h1 .highlight{background:linear-gradient(135deg,var(--accent),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:clamp(16px,2vw,20px);color:var(--muted2);max-width:600px;line-height:1.7;margin-bottom:36px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.hero-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;color:var(--cyan)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+
+/* Features */
+.section{padding:80px 40px;max-width:1200px;margin:0 auto}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+.section-title{font-size:clamp(28px,4vw,42px);font-weight:700;margin-bottom:16px;letter-spacing:-0.5px}
+.section-sub{font-size:16px;color:var(--muted2);max-width:560px;line-height:1.7;margin-bottom:48px}
+
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.feature-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;transition:all .3s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;background:linear-gradient(135deg,rgba(79,110,247,0.06),transparent)}
+.feature-card:hover::before{opacity:1}
+.feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.feature-icon{width:44px;height:44px;border-radius:10px;background:rgba(79,110,247,0.15);border:1px solid rgba(79,110,247,0.3);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.feature-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.feature-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+
+/* How it works */
+.how-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 40px}
+.how-inner{max-width:1200px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;margin-top:48px;position:relative}
+.step{text-align:center;padding:24px}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:600;color:var(--accent);opacity:.3;margin-bottom:12px}
+.step-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.step-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+
+/* Resilience banner */
+.resilience-section{padding:80px 40px;max-width:1200px;margin:0 auto}
+.resilience-banner{background:linear-gradient(135deg,rgba(79,110,247,0.1),rgba(0,212,255,0.05));border:1px solid rgba(79,110,247,0.3);border-radius:20px;padding:48px;position:relative;overflow:hidden}
+.resilience-banner::before{content:'RESILIENCE ENGINE';position:absolute;top:20px;right:24px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);opacity:.4}
+.resilience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:32px}
+.resilience-item{background:rgba(0,0,0,0.3);border:1px solid var(--border2);border-radius:12px;padding:20px}
+.resilience-item-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--cyan);margin-bottom:8px;text-transform:uppercase}
+.resilience-item-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+.resilience-formula{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);border-radius:6px;padding:8px 12px;margin-top:10px}
+
+/* CTA section */
+.cta-section{padding:80px 40px;text-align:center}
+.cta-inner{max-width:600px;margin:0 auto}
+.cta-inner h2{font-size:clamp(28px,4vw,42px);font-weight:700;margin-bottom:16px}
+.cta-inner p{color:var(--muted2);font-size:16px;margin-bottom:32px;line-height:1.7}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;letter-spacing:2px;color:var(--muted2)}
+.footer-logo span{color:var(--cyan)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:var(--muted);transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* Status indicator */
+.status-live{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.25);font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--green);letter-spacing:1px}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+
+@media(max-width:768px){
+  nav{padding:0 16px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 40px}
+  .section{padding:60px 20px}
+  .how-section{padding:60px 20px}
+  .resilience-section{padding:60px 20px}
+  .cta-section{padding:60px 20px}
+  footer{padding:24px 20px;flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">B</div>
+    BUS<span>TRACK</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#resilience">Resilience</a>
+    <a href="index.html">Live Demo</a>
+  </div>
+  <div class="nav-cta">
+    <a href="login.html"><button class="btn btn-outline">Log in</button></a>
+    <a href="login.html#signup"><button class="btn btn-primary">Get started</button></a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    LIVE TRACKING ACTIVE — 3 BUSES ONLINE
+  </div>
+  <h1>Campus Transport,<br><span class="highlight">Always Online.</span></h1>
+  <p>Real-time bus tracking that keeps working even when GPS fails or the network drops. Built for college campuses. Powered by dead reckoning and WebSocket resilience.</p>
+  <div class="hero-btns">
+    <a href="index.html"><button class="btn btn-primary btn-large">Launch Live Demo</button></a>
+    <a href="login.html"><button class="btn btn-ghost">Get Started Free</button></a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Live Buses</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2s</div>
+      <div class="stat-label">Update Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Campus Stops</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">99%</div>
+      <div class="stat-label">Uptime</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-label">What we offer</div>
+  <h2 class="section-title">Everything your campus needs</h2>
+  <p class="section-sub">From live GPS tracking to offline resilience — BusTrack handles every scenario your campus transport faces.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🗺️</div>
+      <div class="feature-title">Live Map Tracking</div>
+      <div class="feature-desc">See every bus moving in real time on an interactive Leaflet.js map with CartoDB dark tiles.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <div class="feature-title">GPS Dead Reckoning</div>
+      <div class="feature-desc">When GPS signal drops, our math engine predicts bus position using speed and heading. Never a frozen marker.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">WebSocket Real-time</div>
+      <div class="feature-desc">Sub-second updates via native FastAPI WebSocket. Data flows from bus to screen in under a second.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📶</div>
+      <div class="feature-title">Offline Resilience</div>
+      <div class="feature-desc">Store-and-forward caching keeps the UI running during network drops. Auto-reconnects and syncs on restore.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🕐</div>
+      <div class="feature-title">ETA Prediction</div>
+      <div class="feature-desc">Haversine formula calculates accurate arrival times to every stop, refreshed every 2 seconds.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">Mobile Responsive</div>
+      <div class="feature-desc">Works perfectly on any device. Students can check bus locations from their phones on the go.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👤</div>
+      <div class="feature-title">Driver Contact</div>
+      <div class="feature-desc">Each bus shows driver name, license, and direct call and WhatsApp buttons for emergencies.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-title">Smart Alerts</div>
+      <div class="feature-desc">Automatic toast notifications for GPS loss, overcrowding, and network drops. Never miss a critical event.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Analytics Dashboard</div>
+      <div class="feature-desc">Trip history, peak hour graphs, and occupancy trends help administrators optimize routes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<div class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-label">Simple by design</div>
+    <h2 class="section-title">How BusTrack works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Driver starts trip</div>
+        <div class="step-desc">The bus driver opens BusTrack and starts their route. GPS data begins streaming to the backend every 2 seconds.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Backend processes data</div>
+        <div class="step-desc">FastAPI receives GPS pings, saves them to SQLite, calculates ETAs using Haversine formula, and broadcasts via WebSocket.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Students see live map</div>
+        <div class="step-desc">The dashboard updates in real time. Students see bus position, speed, occupancy, and arrival time for their stop.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Resilience kicks in</div>
+        <div class="step-desc">If GPS or network drops, dead reckoning and offline caching keep everything running. Students never see an error.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Resilience -->
+<section class="resilience-section" id="resilience">
+  <div class="section-label">Core innovation</div>
+  <h2 class="section-title">Built to never fail</h2>
+  <div class="resilience-banner">
+    <p style="color:var(--muted2);font-size:15px;max-width:600px;line-height:1.7">Most tracking systems show a blank screen when GPS or network fails. BusTrack uses three layers of resilience to keep the UI accurate and informative no matter what.</p>
+    <div class="resilience-grid">
+      <div class="resilience-item">
+        <div class="resilience-item-title">GPS Dead Reckoning</div>
+        <div class="resilience-item-desc">When GPS signal is lost, the frontend switches to a deterministic prediction engine using last known speed and heading.</div>
+        <div class="resilience-formula">dist = (speed/3600) × elapsed<br>new_lat = lat + (dist × cos(hdg)) / 111</div>
+      </div>
+      <div class="resilience-item">
+        <div class="resilience-item-title">WebSocket Store & Forward</div>
+        <div class="resilience-item-desc">Missed updates are cached in memory during disconnection. On reconnect, flushCache() replays them in order.</div>
+        <div class="resilience-formula">offlineCache[] → flushCache()<br>reconnect every 3s automatically</div>
+      </div>
+      <div class="resilience-item">
+        <div class="resilience-item-title">Haversine ETA</div>
+        <div class="resilience-item-desc">Great-circle distance formula gives accurate ETAs to every stop, even during predicted mode.</div>
+        <div class="resilience-formula">a = sin²(Δlat/2) + cos(lat1)·cos(lat2)·sin²(Δlng/2)<br>ETA = (R·2·atan2(√a,√(1-a))) / speed × 60</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="status-live" style="margin-bottom:20px"><span class="status-dot"></span>SYSTEM ONLINE</div>
+    <h2>Ready to track your campus buses?</h2>
+    <p>Set up BusTrack on your college campus in under 5 minutes. No external services, no complex setup, no cost.</p>
+    <div class="cta-btns">
+      <a href="index.html"><button class="btn btn-primary btn-large">Launch Live Demo</button></a>
+      <a href="login.html"><button class="btn btn-ghost">Create Admin Account</button></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">BUS<span>TRACK</span></div>
+  <div class="footer-links">
+    <a href="index.html">Live Map</a>
+    <a href="admin.html">Admin</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="https://github.com/snowydabre9-max/bustrack" target="_blank">GitHub</a>
+  </div>
+  <div class="footer-copy">Built for Hackathon 2026 · BusTrack Campus</div>
+</footer>
+
+</body>
+</html>

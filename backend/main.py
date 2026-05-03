@@ -17,7 +17,6 @@ app.add_middleware(
 
 connected_clients: List[WebSocket] = []
 
-# Store state for ALL buses
 bus_states: Dict[str, BusState] = {
     "BUS-01": BusState(bus_id="BUS-01", lat=12.9716, lng=77.5946,
                        speed=30.0, heading=90.0, gps_active=True,
@@ -39,7 +38,6 @@ ROUTE_STOPS = [
     {"name": "BTM Layout",       "lat": 12.9166, "lng": 77.6101},
 ]
 
-# Bus schedule (departure times)
 SCHEDULE = {
     "BUS-01": ["06:00","06:30","07:00","07:30","08:00","08:30",
                "09:00","12:00","15:00","18:00","20:00","22:00"],
@@ -49,18 +47,45 @@ SCHEDULE = {
                "09:30","12:30","15:30","18:30","20:30","22:30"],
 }
 
-@app.on_event("startup")
-async def startup():
-    init_db()
+# ── Page routes ──────────────────────────────────────────────
 
 @app.get("/")
 async def root():
     return FileResponse("../frontend/index.html")
 
+@app.get("/landing.html")
+async def landing():
+    return FileResponse("../frontend/landing.html")
+
+@app.get("/login.html")
+async def login_page():
+    return FileResponse("../frontend/login.html")
+
+@app.get("/admin.html")
+async def admin_page():
+    return FileResponse("../frontend/admin.html")
+
+@app.get("/driver.html")
+async def driver_page():
+    return FileResponse("../frontend/driver.html")
+
+@app.get("/analytics.html")
+async def analytics_page():
+    return FileResponse("../frontend/analytics.html")
+
+@app.get("/settings.html")
+async def settings_page():
+    return FileResponse("../frontend/settings.html")
+
+# ── API routes ───────────────────────────────────────────────
+
+@app.on_event("startup")
+async def startup():
+    init_db()
+
 @app.post("/api/gps")
 async def receive_gps(ping: GPSPing):
     save_gps_ping(ping)
-
     state = bus_states.get(ping.bus_id)
     if state:
         state.lat         = ping.lat
@@ -76,8 +101,10 @@ async def receive_gps(ping: GPSPing):
     payload = {
         "type":       "bus_update",
         "bus_id":     ping.bus_id,
-        "lat":        ping.lat, "lng": ping.lng,
-        "speed":      ping.speed, "heading": ping.heading,
+        "lat":        ping.lat,
+        "lng":        ping.lng,
+        "speed":      ping.speed,
+        "heading":    ping.heading,
         "gps_active": ping.gps_active,
         "status":     "live" if ping.gps_active else "predicted",
         "timestamp":  time.time(),
@@ -96,9 +123,15 @@ async def get_state():
         all_states.append({**state.dict(), "etas": etas, "stops": ROUTE_STOPS})
     return {"buses": all_states, "schedule": SCHEDULE}
 
+@app.get("/api/history")
+async def get_history():
+    return {"history": get_recent_pings(50)}
+
 @app.get("/api/schedule")
 async def get_schedule():
     return {"schedule": SCHEDULE, "stops": ROUTE_STOPS}
+
+# ── WebSocket ────────────────────────────────────────────────
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

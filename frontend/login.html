@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BusTrack — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050810;--surface:#0a0e1a;--surface2:#0f1526;
+  --border:#1a2040;--border2:#243060;
+  --text:#e2e8ff;--muted:#4a5580;--muted2:#6b7db3;
+  --accent:#4f6ef7;--cyan:#00d4ff;--green:#00ff88;
+  --amber:#ffaa00;--red:#ff4466;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}
+
+/* Nav */
+nav{padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.nav-logo-icon{width:26px;height:26px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent)}
+.nav-logo span{color:var(--cyan)}
+
+/* Main */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;position:relative;overflow:hidden}
+.main::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(79,110,247,0.1),transparent)}
+
+/* Card */
+.auth-card{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:36px;position:relative;z-index:1}
+
+/* Tabs */
+.tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:28px;gap:4px}
+.tab{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--accent);color:#fff}
+
+/* Form */
+.form-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.form-sub{font-size:13px;color:var(--muted2);margin-bottom:24px;line-height:1.5}
+
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:500;color:var(--muted2);margin-bottom:6px;display:block;letter-spacing:.3px}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--muted)}
+
+/* Role selector */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.role-card{border:1px solid var(--border2);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;background:var(--surface2)}
+.role-card:hover{border-color:var(--accent)}
+.role-card.selected{border-color:var(--accent);background:rgba(79,110,247,0.1)}
+.role-icon{font-size:24px;margin-bottom:6px}
+.role-name{font-size:13px;font-weight:600}
+.role-desc{font-size:10px;color:var(--muted2);margin-top:2px}
+
+/* Submit button */
+.submit-btn{width:100%;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px}
+.submit-btn:hover{background:#3d5ce5;transform:translateY(-1px)}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0}
+.divider-line{flex:1;height:1px;background:var(--border2)}
+.divider-text{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* Demo accounts */
+.demo-accounts{margin-top:20px}
+.demo-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+.demo-grid{display:flex;flex-direction:column;gap:8px}
+.demo-account{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s}
+.demo-account:hover{border-color:var(--border2)}
+.demo-info{display:flex;flex-direction:column;gap:2px}
+.demo-role{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.demo-role.admin{color:var(--accent)}
+.demo-role.driver{color:var(--amber)}
+.demo-creds{font-size:11px;color:var(--muted2)}
+.demo-use{font-size:10px;color:var(--muted);padding:4px 8px;border:1px solid var(--border2);border-radius:4px;font-family:'JetBrains Mono',monospace;transition:all .2s}
+.demo-account:hover .demo-use{border-color:var(--accent);color:var(--accent)}
+
+/* Alert */
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.alert-error{background:rgba(255,68,102,0.1);border:1px solid rgba(255,68,102,0.3);color:var(--red)}
+.alert-success{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:var(--green)}
+
+/* Footer */
+footer{padding:20px 40px;text-align:center;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="landing.html">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">B</div>
+      BUS<span>TRACK</span>
+    </div>
+  </a>
+</nav>
+
+<div class="main">
+  <div class="auth-card">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">Log in</button>
+      <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert" id="alert-box"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <div class="form-title">Welcome back</div>
+      <div class="form-sub">Log in to your BusTrack account to continue.</div>
+
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@college.edu"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="Enter your password"/>
+      </div>
+
+      <button class="submit-btn" onclick="handleLogin()">Log in to BusTrack</button>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">DEMO ACCOUNTS</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="demo-accounts">
+        <div class="demo-title">Click to autofill</div>
+        <div class="demo-grid">
+          <div class="demo-account" onclick="fillDemo('admin@bustrack.com','admin123')">
+            <div class="demo-info">
+              <span class="demo-role admin">ADMIN</span>
+              <span class="demo-creds">admin@bustrack.com · admin123</span>
+            </div>
+            <span class="demo-use">USE</span>
+          </div>
+          <div class="demo-account" onclick="fillDemo('driver01@bustrack.com','driver123')">
+            <div class="demo-info">
+              <span class="demo-role driver">DRIVER</span>
+              <span class="demo-creds">driver01@bustrack.com · driver123</span>
+            </div>
+            <span class="demo-use">USE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signup-form" style="display:none">
+      <div class="form-title">Create account</div>
+      <div class="form-sub">Join BusTrack to manage or track campus buses.</div>
+
+      <div style="margin-bottom:16px">
+        <label class="form-label">I am a...</label>
+        <div class="role-grid">
+          <div class="role-card selected" id="role-admin" onclick="selectRole('admin')">
+            <div class="role-icon">🛡️</div>
+            <div class="role-name">Admin</div>
+            <div class="role-desc">Manage routes & buses</div>
+          </div>
+          <div class="role-card" id="role-driver" onclick="selectRole('driver')">
+            <div class="role-icon">🚌</div>
+            <div class="role-name">Driver</div>
+            <div class="role-desc">View my route & trips</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input class="form-input" type="text" id="signup-name" placeholder="Your full name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="you@college.edu"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="signup-password" placeholder="Create a password"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">College name</label>
+        <input class="form-input" type="text" id="signup-college" placeholder="Your college name"/>
+      </div>
+
+      <button class="submit-btn" onclick="handleSignup()">Create account</button>
+    </div>
+
+  </div>
+</div>
+
+<footer>BusTrack Campus · Built for Hackathon 2026</footer>
+
+<script>
+// ── Tab switching ──
+function switchTab(tab) {
+  document.getElementById('login-form').style.display  = tab==='login'  ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('tab-login').className  = 'tab' + (tab==='login'  ? ' active' : '');
+  document.getElementById('tab-signup').className = 'tab' + (tab==='signup' ? ' active' : '');
+  hideAlert();
+}
+
+// ── Role selection ──
+let selectedRole = 'admin';
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-admin').classList.toggle('selected', role==='admin');
+  document.getElementById('role-driver').classList.toggle('selected', role==='driver');
+}
+
+// ── Demo autofill ──
+function fillDemo(email, password) {
+  document.getElementById('login-email').value    = email;
+  document.getElementById('login-password').value = password;
+  showAlert('success', 'Demo credentials filled — click Log in');
+}
+
+// ── Alert helpers ──
+function showAlert(type, msg) {
+  const el = document.getElementById('alert-box');
+  el.className = `alert alert-${type}`;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideAlert() {
+  document.getElementById('alert-box').style.display = 'none';
+}
+
+// ── Login handler ──
+function handleLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!email || !password) {
+    showAlert('error', 'Please enter your email and password');
+    return;
+  }
+
+  // Demo login logic
+  if (email === 'admin@bustrack.com' && password === 'admin123') {
+    showAlert('success', 'Welcome Admin! Redirecting to dashboard...');
+    setTimeout(() => window.location.href = 'admin.html', 1200);
+  } else if (email === 'driver01@bustrack.com' && password === 'driver123') {
+    showAlert('success', 'Welcome Driver! Redirecting to your panel...');
+    setTimeout(() => window.location.href = 'driver.html', 1200);
+  } else {
+    showAlert('error', 'Invalid credentials. Use the demo accounts below.');
+  }
+}
+
+// ── Signup handler ──
+function handleSignup() {
+  const name     = document.getElementById('signup-name').value.trim();
+  const email    = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value.trim();
+  const college  = document.getElementById('signup-college').value.trim();
+
+  if (!name || !email || !password || !college) {
+    showAlert('error', 'Please fill in all fields');
+    return;
+  }
+  if (password.length < 6) {
+    showAlert('error', 'Password must be at least 6 characters');
+    return;
+  }
+
+  showAlert('success', `Account created! Welcome ${name}. Redirecting...`);
+  setTimeout(() => {
+    window.location.href = selectedRole === 'admin' ? 'admin.html' : 'driver.html';
+  }, 1500);
+}
+
+// Check if opened with #signup hash
+if (window.location.hash === '#signup') switchTab('signup');
+</script>
+</body>
+</html>

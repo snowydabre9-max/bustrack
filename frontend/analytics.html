@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BusTrack — Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050810;--surface:#0a0e1a;--surface2:#0f1526;
+  --border:#1a2040;--border2:#243060;
+  --text:#e2e8ff;--muted:#4a5580;--muted2:#6b7db3;
+  --accent:#4f6ef7;--cyan:#00d4ff;--green:#00ff88;
+  --amber:#ffaa00;--red:#ff4466;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}
+
+/* Nav */
+nav{padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border2);flex-shrink:0}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.logo-icon{width:26px;height:26px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent)}
+.logo-text span{color:var(--cyan)}
+.nav-links{display:flex;gap:6px}
+.nav-link{padding:6px 12px;border-radius:7px;font-size:12px;color:var(--muted2);transition:all .2s;cursor:pointer;border:1px solid transparent}
+.nav-link:hover{color:var(--text);border-color:var(--border2)}
+.nav-link.active{color:var(--accent);border-color:rgba(79,110,247,0.3);background:rgba(79,110,247,0.08)}
+
+/* Content */
+.content{padding:24px;flex:1;max-width:1400px;margin:0 auto;width:100%}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.page-sub{font-size:13px;color:var(--muted2);margin-top:2px}
+.date-range{display:flex;gap:6px}
+.date-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);font-size:11px;cursor:pointer;color:var(--muted2);font-family:'JetBrains Mono',monospace;transition:all .2s}
+.date-btn:hover,.date-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(79,110,247,0.08)}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px}
+.stat-label{font-size:10px;color:var(--muted2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600}
+.stat-change{font-size:11px;margin-top:4px}
+.up{color:var(--green)}
+.down{color:var(--red)}
+
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.charts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){
+  .charts-grid{grid-template-columns:1fr}
+  .charts-grid-2{grid-template-columns:1fr}
+}
+.chart-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:18px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:600}
+.chart-sub{font-size:11px;color:var(--muted2);margin-top:2px}
+.chart-wrap{position:relative}
+.chart-legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap=6px;font-size:11px;color:var(--muted2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px}
+
+/* Table */
+.table-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:13px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{padding:9px 16px;text-align:left;font-size:10px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border2);background:var(--surface2)}
+td{padding:11px 16px;font-size:12px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.td-mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge-green{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+.badge-amber{background:rgba(255,170,0,0.1);color:var(--amber);border:1px solid rgba(255,170,0,0.2)}
+.badge-red{background:rgba(255,68,102,0.1);color:var(--red);border:1px solid rgba(255,68,102,0.2)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="landing.html">
+    <div class="nav-logo">
+      <div class="logo-icon">B</div>
+      <div class="logo-text">BUS<span>TRACK</span></div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="admin.html"><div class="nav-link">Dashboard</div></a>
+    <a href="index.html"><div class="nav-link">Live Map</div></a>
+    <div class="nav-link active">Analytics</div>
+    <a href="settings.html"><div class="nav-link">Settings</div></a>
+  </div>
+  <a href="login.html" style="font-size:12px;color:var(--muted2)">Logout</a>
+</nav>
+
+<div class="content">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Analytics</div>
+      <div class="page-sub">Trip history, performance metrics, and passenger insights</div>
+    </div>
+    <div class="date-range">
+      <button class="date-btn active">Today</button>
+      <button class="date-btn">7 Days</button>
+      <button class="date-btn">30 Days</button>
+      <button class="date-btn">All Time</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Trips</div>
+      <div class="stat-value" style="color:var(--accent)">24</div>
+      <div class="stat-change up">↑ 12% vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Passengers</div>
+      <div class="stat-value" style="color:var(--cyan)">847</div>
+      <div class="stat-change up">↑ 8% vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Speed</div>
+      <div class="stat-value" style="color:var(--green)">34<span style="font-size:14px">km/h</span></div>
+      <div class="stat-change up">↑ Normal range</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">GPS Drops</div>
+      <div class="stat-value" style="color:var(--amber)">7</div>
+      <div class="stat-change down">↓ 3 less than avg</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">On-Time Rate</div>
+      <div class="stat-value" style="color:var(--green)">94<span style="font-size:14px">%</span></div>
+      <div class="stat-change up">↑ 2% vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Occupancy</div>
+      <div class="stat-value" style="color:var(--accent)">62<span style="font-size:14px">%</span></div>
+      <div class="stat-change up">↑ Peak at 08:00</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Passenger Traffic — Today</div>
+          <div class="chart-sub">Hourly passenger count across all buses</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="traffic-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Trips per Bus</div>
+          <div class="chart-sub">Distribution today</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="trips-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="charts-grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Average Speed by Hour</div>
+          <div class="chart-sub">All buses combined</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="speed-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">GPS Reliability</div>
+          <div class="chart-sub">Live vs predicted ratio</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="gps-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trip log table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Trip Log — Today</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Trip ID</th>
+          <th>Bus</th>
+          <th>Driver</th>
+          <th>Route</th>
+          <th>Departed</th>
+          <th>Arrived</th>
+          <th>Passengers</th>
+          <th>GPS Drops</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-mono">#TRP-001</td>
+          <td class="td-mono" style="color:var(--accent)">BUS-01</td>
+          <td>Rajesh Kumar</td>
+          <td>Central → BTM</td>
+          <td class="td-mono">06:00</td>
+          <td class="td-mono">06:28</td>
+          <td class="td-mono">42</td>
+          <td class="td-mono">1</td>
+          <td><span class="badge badge-green">COMPLETED</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono">#TRP-002</td>
+          <td class="td-mono" style="color:var(--green)">BUS-02</td>
+          <td>Priya Sharma</td>
+          <td>North Campus Loop</td>
+          <td class="td-mono">06:15</td>
+          <td class="td-mono">06:35</td>
+          <td class="td-mono">28</td>
+          <td class="td-mono">0</td>
+          <td><span class="badge badge-green">COMPLETED</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono">#TRP-003</td>
+          <td class="td-mono" style="color:var(--amber)">BUS-03</td>
+          <td>Arun Nair</td>
+          <td>South Express</td>
+          <td class="td-mono">06:30</td>
+          <td class="td-mono">06:46</td>
+          <td class="td-mono">35</td>
+          <td class="td-mono">2</td>
+          <td><span class="badge badge-green">COMPLETED</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono">#TRP-004</td>
+          <td class="td-mono" style="color:var(--accent)">BUS-01</td>
+          <td>Rajesh Kumar</td>
+          <td>Central → BTM</td>
+          <td class="td-mono">07:00</td>
+          <td class="td-mono">07:31</td>
+          <td class="td-mono">58</td>
+          <td class="td-mono">0</td>
+          <td><span class="badge badge-amber">DELAYED</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono">#TRP-005</td>
+          <td class="td-mono" style="color:var(--green)">BUS-02</td>
+          <td>Priya Sharma</td>
+          <td>North Campus Loop</td>
+          <td class="td-mono">07:15</td>
+          <td class="td-mono">—</td>
+          <td class="td-mono">31</td>
+          <td class="td-mono">1</td>
+          <td><span class="badge badge-green" style="background:rgba(79,110,247,0.1);color:var(--accent);border-color:rgba(79,110,247,0.2)">IN PROGRESS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const chartDefaults = {
+  color: '#6b7db3',
+  borderColor: '#1a2040',
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: 'rgba(26,32,64,0.8)' }, ticks: { color: '#4a5580', font: { size: 10 } } },
+    y: { grid: { color: 'rgba(26,32,64,0.8)' }, ticks: { color: '#4a5580', font: { size: 10 } } }
+  }
+};
+
+// Traffic chart
+new Chart(document.getElementById('traffic-chart'), {
+  type: 'bar',
+  data: {
+    labels: ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'],
+    datasets: [
+      { label:'BUS-01', data:[42,58,61,45,32,28,38,40,35,48,55,60,52], backgroundColor:'rgba(79,110,247,0.7)', borderRadius:4 },
+      { label:'BUS-02', data:[28,35,40,30,22,20,25,28,24,32,38,42,36], backgroundColor:'rgba(0,255,136,0.7)', borderRadius:4 },
+      { label:'BUS-03', data:[35,42,50,38,28,24,30,34,29,40,46,50,44], backgroundColor:'rgba(255,170,0,0.7)', borderRadius:4 },
+    ]
+  },
+  options: {
+    ...chartDefaults,
+    plugins: { legend: { display: true, labels: { color:'#6b7db3', font: { size: 10 }, boxWidth: 10 } } },
+    scales: chartDefaults.scales,
+    responsive: true, maintainAspectRatio: false,
+  }
+});
+
+// Trips donut
+new Chart(document.getElementById('trips-chart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['BUS-01','BUS-02','BUS-03'],
+    datasets: [{
+      data: [9, 8, 7],
+      backgroundColor: ['rgba(79,110,247,0.8)','rgba(0,255,136,0.8)','rgba(255,170,0,0.8)'],
+      borderColor: '#050810', borderWidth: 3, hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, position: 'bottom', labels: { color:'#6b7db3', font:{size:10}, boxWidth:10, padding:12 } } },
+    cutout: '65%',
+  }
+});
+
+// Speed chart
+new Chart(document.getElementById('speed-chart'), {
+  type: 'line',
+  data: {
+    labels: ['06','07','08','09','10','11','12','13','14','15','16','17','18'],
+    datasets: [{
+      data: [32,28,24,30,36,38,35,34,36,32,28,30,34],
+      borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.08)',
+      borderWidth: 2, pointRadius: 3, pointBackgroundColor:'#00d4ff', tension:.4, fill:true,
+    }]
+  },
+  options: { ...chartDefaults, responsive:true, maintainAspectRatio:false }
+});
+
+// GPS reliability
+new Chart(document.getElementById('gps-chart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Live GPS','Predicted'],
+    datasets: [{
+      data: [93, 7],
+      backgroundColor: ['rgba(0,255,136,0.8)','rgba(255,170,0,0.8)'],
+      borderColor: '#050810', borderWidth: 3,
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false, cutout:'70%',
+    plugins:{ legend:{ display:true, position:'bottom', labels:{ color:'#6b7db3', font:{size:10}, boxWidth:10, padding:12 } } }
+  }
+});
+
+// Date range buttons
+document.querySelectorAll('.date-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

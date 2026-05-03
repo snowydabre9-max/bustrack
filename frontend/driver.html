@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BusTrack — Driver Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050810;--surface:#0a0e1a;--surface2:#0f1526;
+  --border:#1a2040;--border2:#243060;
+  --text:#e2e8ff;--muted:#4a5580;--muted2:#6b7db3;
+  --accent:#4f6ef7;--cyan:#00d4ff;--green:#00ff88;
+  --amber:#ffaa00;--red:#ff4466;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+a{text-decoration:none;color:inherit}
+
+/* Nav */
+nav{padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border2);flex-shrink:0}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.logo-icon{width:26px;height:26px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent)}
+.logo-text span{color:var(--cyan)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.driver-chip{display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;font-size:12px}
+.driver-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#ff8800);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.icon-btn{width:30px;height:30px;border:1px solid var(--border2);border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Main layout */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* Left panel */
+.left-panel{width:300px;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.panel-section{padding:16px;border-bottom:1px solid var(--border)}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+
+/* Trip status card */
+.trip-card{background:var(--surface2);border-radius:12px;padding:16px;border:1px solid var(--border2)}
+.trip-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.trip-status-label{font-size:13px;font-weight:600}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.pill-live{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+.pill-pred{background:rgba(255,170,0,0.12);color:var(--amber);border:1px solid rgba(255,170,0,0.2)}
+.pill-off{background:rgba(74,85,128,0.2);color:var(--muted2);border:1px solid var(--border2)}
+.pill-dot{width:4px;height:4px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Trip button */
+.trip-btn{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:'Inter',sans-serif;letter-spacing:.3px}
+.trip-btn-start{background:linear-gradient(135deg,var(--green),#00aa55);color:#000}
+.trip-btn-start:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,255,136,0.3)}
+.trip-btn-end{background:linear-gradient(135deg,var(--red),#cc2244);color:#fff}
+.trip-btn-end:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,68,102,0.3)}
+
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.metric-label{font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.metric-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;margin-top:3px;color:var(--amber)}
+.metric-unit{font-size:9px;color:var(--muted);margin-left:2px}
+
+/* Stop list */
+.stop-list{display:flex;flex-direction:column;gap:0}
+.stop-item{display:flex;align-items:center;gap:12px;padding:10px 0;position:relative}
+.stop-item:not(:last-child)::after{content:'';position:absolute;left:7px;top:28px;bottom:-10px;width:1px;background:var(--border2)}
+.stop-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);flex-shrink:0;z-index:1;transition:all .3s}
+.stop-dot.done{background:var(--green);border-color:var(--green)}
+.stop-dot.current{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent)}
+.stop-dot.next{border-color:var(--cyan)}
+.stop-info{flex:1;min-width:0}
+.stop-name{font-size:12px;font-weight:500}
+.stop-eta{font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.stop-badge{font-size:9px;padding:2px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.badge-done{background:rgba(0,255,136,0.1);color:var(--green)}
+.badge-current{background:rgba(79,110,247,0.15);color:var(--accent)}
+.badge-next{background:rgba(0,212,255,0.1);color:var(--cyan)}
+
+/* Incident report */
+.incident-form{display:flex;flex-direction:column;gap:10px}
+.incident-input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;resize:none;transition:border-color .2s}
+.incident-input:focus{border-color:var(--accent)}
+.incident-types{display:flex;flex-wrap:wrap;gap:6px}
+.incident-tag{padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;font-size:10px;cursor:pointer;color:var(--muted2);font-family:'JetBrains Mono',monospace;transition:all .2s}
+.incident-tag:hover,.incident-tag.selected{border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.08)}
+.report-btn{padding:8px;border-radius:8px;border:none;background:var(--amber);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.report-btn:hover{background:#cc8800}
+
+/* Map area */
+.map-area{flex:1;position:relative;background:var(--bg);display:flex;flex-direction:column}
+.map-topbar{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.map-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.map-actions{display:flex;gap:8px}
+.map-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:11px;cursor:pointer;color:var(--muted2);font-family:'JetBrains Mono',monospace;transition:all .2s}
+.map-btn:hover{border-color:var(--accent);color:var(--accent)}
+#driver-map{flex:1}
+
+/* Alert toast */
+.toast{position:fixed;top:70px;right:16px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;font-size:12px;z-index:1000;display:none;animation:slideIn .3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:280px}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.show{display:block}
+.toast-title{font-weight:600;margin-bottom:3px;font-size:13px}
+.toast-msg{color:var(--muted2);font-size:11px}
+
+@media(max-width:768px){
+  .left-panel{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border2)}
+  .main{flex-direction:column}
+  #driver-map{min-height:300px}
+}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="landing.html">
+    <div class="nav-logo">
+      <div class="logo-icon">B</div>
+      <div class="logo-text">BUS<span>TRACK</span></div>
+    </div>
+  </a>
+  <div class="nav-right">
+    <div class="driver-chip">
+      <div class="driver-avatar">RK</div>
+      <span>Rajesh Kumar</span>
+      <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px">BUS-01</span>
+    </div>
+    <a href="login.html"><button class="icon-btn" title="Logout">🚪</button></a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- Left panel -->
+  <div class="left-panel">
+
+    <!-- Trip control -->
+    <div class="panel-section">
+      <div class="panel-title">Trip Control</div>
+      <div class="trip-card">
+        <div class="trip-status">
+          <div class="trip-status-label">Current Status</div>
+          <div class="status-pill pill-live" id="trip-status-pill">
+            <span class="pill-dot"></span>ON TRIP
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);margin-bottom:14px;font-family:'JetBrains Mono',monospace">
+          Route: Central → BTM Layout<br>
+          Started: <span id="trip-start-time">—</span>
+        </div>
+        <button class="trip-btn trip-btn-end" id="trip-btn" onclick="toggleTrip()">
+          End Trip
+        </button>
+      </div>
+    </div>
+
+    <!-- Live metrics -->
+    <div class="panel-section">
+      <div class="panel-title">Live Metrics</div>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-label">Speed</div>
+          <div class="metric-value" id="d-speed">—<span class="metric-unit">km/h</span></div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Passengers</div>
+          <div class="metric-value" id="d-pax">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Heading</div>
+          <div class="metric-value" id="d-heading">—<span class="metric-unit">°</span></div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">GPS</div>
+          <div class="metric-value" id="d-gps" style="font-size:12px;color:var(--green)">LIVE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Route stops -->
+    <div class="panel-section">
+      <div class="panel-title">Route Progress</div>
+      <div class="stop-list">
+        <div class="stop-item">
+          <div class="stop-dot done"></div>
+          <div class="stop-info">
+            <div class="stop-name">Central Station</div>
+            <div class="stop-eta">Departed 06:02</div>
+          </div>
+          <span class="stop-badge badge-done">DONE</span>
+        </div>
+        <div class="stop-item">
+          <div class="stop-dot done"></div>
+          <div class="stop-info">
+            <div class="stop-name">MG Road</div>
+            <div class="stop-eta">Departed 06:14</div>
+          </div>
+          <span class="stop-badge badge-done">DONE</span>
+        </div>
+        <div class="stop-item">
+          <div class="stop-dot current"></div>
+          <div class="stop-info">
+            <div class="stop-name">Indiranagar</div>
+            <div class="stop-eta" id="eta-indiranagar">Arriving soon</div>
+          </div>
+          <span class="stop-badge badge-current">NOW</span>
+        </div>
+        <div class="stop-item">
+          <div class="stop-dot next"></div>
+          <div class="stop-info">
+            <div class="stop-name">Domlur</div>
+            <div class="stop-eta" id="eta-domlur">—</div>
+          </div>
+          <span class="stop-badge badge-next">NEXT</span>
+        </div>
+        <div class="stop-item">
+          <div class="stop-dot"></div>
+          <div class="stop-info">
+            <div class="stop-name">Koramangala</div>
+            <div class="stop-eta" id="eta-koramangala">—</div>
+          </div>
+        </div>
+        <div class="stop-item">
+          <div class="stop-dot"></div>
+          <div class="stop-info">
+            <div class="stop-name">BTM Layout</div>
+            <div class="stop-eta" id="eta-btm">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incident report -->
+    <div class="panel-section">
+      <div class="panel-title">Report Incident</div>
+      <div class="incident-form">
+        <div class="incident-types">
+          <button class="incident-tag" onclick="selectTag(this)">Breakdown</button>
+          <button class="incident-tag" onclick="selectTag(this)">Accident</button>
+          <button class="incident-tag" onclick="selectTag(this)">Delay</button>
+          <button class="incident-tag" onclick="selectTag(this)">Overcrowded</button>
+          <button class="incident-tag" onclick="selectTag(this)">Other</button>
+        </div>
+        <textarea class="incident-input" rows="3" placeholder="Describe the incident..."></textarea>
+        <button class="report-btn" onclick="submitIncident()">Submit Report</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Map area -->
+  <div class="map-area">
+    <div class="map-topbar">
+      <div class="map-title">
+        🗺️ Live Route Map
+        <span class="status-pill pill-live" style="font-size:9px" id="map-status-pill">
+          <span class="pill-dot"></span>LIVE
+        </span>
+      </div>
+      <div class="map-actions">
+        <a href="index.html"><button class="map-btn">FULL MAP</button></a>
+        <a href="admin.html"><button class="map-btn">ADMIN</button></a>
+      </div>
+    </div>
+    <div id="driver-map"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title">Alert</div>
+  <div class="toast-msg" id="toast-msg"></div>
+</div>
+
+<script>
+const SERVER_WS   = `ws://${location.hostname}:8000/ws`;
+const SERVER_HTTP = `http://${location.hostname}:8000`;
+
+// ── Map ──
+const map = L.map('driver-map').setView([12.9716, 77.5946], 14);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'© OpenStreetMap © CARTO', maxZoom:19
+}).addTo(map);
+
+let busMarker = null;
+let trailLine = L.polyline([], {color:'#ffaa00',weight:3,opacity:.7}).addTo(map);
+
+const stopIcon = L.divIcon({
+  className:'',
+  html:'<div style="width:10px;height:10px;border-radius:50%;background:#4f6ef7;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.5)"></div>',
+  iconSize:[10,10], iconAnchor:[5,5]
+});
+
+// Draw route stops
+const stops = [
+  {name:'Central Station', lat:12.9716, lng:77.5946},
+  {name:'MG Road',         lat:12.9755, lng:77.6072},
+  {name:'Indiranagar',     lat:12.9784, lng:77.6408},
+  {name:'Domlur',          lat:12.9622, lng:77.6387},
+  {name:'Koramangala',     lat:12.9352, lng:77.6245},
+  {name:'BTM Layout',      lat:12.9166, lng:77.6101},
+];
+stops.forEach(s => {
+  L.marker([s.lat, s.lng], {icon: stopIcon})
+   .bindPopup(`<b>${s.name}</b>`).addTo(map);
+});
+
+// ── Trip control ──
+let tripActive = true;
+let tripStartTime = new Date().toLocaleTimeString();
+document.getElementById('trip-start-time').textContent = tripStartTime;
+
+function toggleTrip() {
+  tripActive = !tripActive;
+  const btn  = document.getElementById('trip-btn');
+  const pill = document.getElementById('trip-status-pill');
+  if (tripActive) {
+    btn.className  = 'trip-btn trip-btn-end';
+    btn.textContent = 'End Trip';
+    pill.className = 'status-pill pill-live';
+    pill.innerHTML = '<span class="pill-dot"></span>ON TRIP';
+    tripStartTime  = new Date().toLocaleTimeString();
+    document.getElementById('trip-start-time').textContent = tripStartTime;
+    showToast('Trip Started', 'GPS tracking is now active.', 'green');
+  } else {
+    btn.className  = 'trip-btn trip-btn-start';
+    btn.textContent = 'Start Trip';
+    pill.className = 'status-pill pill-off';
+    pill.innerHTML = 'OFF DUTY';
+    showToast('Trip Ended', 'You have ended the trip. Have a safe day!', 'amber');
+  }
+}
+
+// ── Incident tags ──
+function selectTag(el) {
+  document.querySelectorAll('.incident-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function submitIncident() {
+  showToast('Incident Reported', 'Your report has been sent to admin.', 'amber');
+  document.querySelector('.incident-input').value = '';
+  document.querySelectorAll('.incident-tag').forEach(t => t.classList.remove('selected'));
+}
+
+// ── Toast ──
+function showToast(title, msg, color) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-msg').textContent   = msg;
+  const colors = {green:'var(--green)', amber:'var(--amber)', red:'var(--red)'};
+  t.style.borderColor = colors[color] || 'var(--border2)';
+  document.getElementById('toast-title').style.color = colors[color] || 'var(--text)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ── WebSocket ──
+function connectWS() {
+  const ws = new WebSocket(SERVER_WS);
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.type !== 'bus_update' || d.bus_id !== 'BUS-01') return;
+
+    // Update metrics
+    document.getElementById('d-speed').innerHTML =
+      `${Math.round(d.speed)}<span class="metric-unit">km/h</span>`;
+    document.getElementById('d-pax').textContent     = d.passengers || '—';
+    document.getElementById('d-heading').innerHTML =
+      `${Math.round(d.heading)}<span class="metric-unit">°</span>`;
+    document.getElementById('d-gps').textContent  = d.gps_active ? 'LIVE' : 'PRED';
+    document.getElementById('d-gps').style.color  =
+      d.gps_active ? 'var(--green)' : 'var(--amber)';
+
+    // Map status
+    const mapPill = document.getElementById('map-status-pill');
+    mapPill.className = `status-pill ${d.gps_active ? 'pill-live' : 'pill-pred'}`;
+    mapPill.innerHTML = `<span class="pill-dot"></span>${d.gps_active ? 'LIVE' : 'PREDICTED'}`;
+
+    // Update ETAs
+    if (d.etas) {
+      const etaMap = {};
+      d.etas.forEach(e => etaMap[e.name] = e.eta_text);
+      document.getElementById('eta-indiranagar').textContent = etaMap['Indiranagar'] || '—';
+      document.getElementById('eta-domlur').textContent      = etaMap['Domlur']      || '—';
+      document.getElementById('eta-koramangala').textContent = etaMap['Koramangala'] || '—';
+      document.getElementById('eta-btm').textContent         = etaMap['BTM Layout']  || '—';
+    }
+
+    // Move marker
+    const icon = L.divIcon({
+      className:'',
+      html:`<div style="width:28px;height:28px;background:${d.gps_active?'#ffaa00':'#4a5580'};border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 0 12px ${d.gps_active?'rgba(255,170,0,0.6)':'transparent'}"></div>`,
+      iconSize:[28,28], iconAnchor:[14,24]
+    });
+
+    if (!busMarker) {
+      busMarker = L.marker([d.lat, d.lng], {icon}).addTo(map);
+      map.setView([d.lat, d.lng], 15);
+    } else {
+      busMarker.setLatLng([d.lat, d.lng]);
+      busMarker.setIcon(icon);
+    }
+
+    const trail = trailLine.getLatLngs();
+    trail.push([d.lat, d.lng]);
+    if (trail.length > 60) trail.shift();
+    trailLine.setLatLngs(trail);
+  };
+  ws.onclose = () => setTimeout(connectWS, 3000);
+}
+
+connectWS();
+</script>
+</body>
+</html>
